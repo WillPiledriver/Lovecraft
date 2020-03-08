@@ -18,19 +18,26 @@ class Lovecraft:
 
         for book in f:
             with open(self.directory.strip("\\") + '/' + book, mode="r", encoding="utf8") as file:
-                self.books[book] = file.read().split("\n")
+                self.books[book] = file.read().split("\n\n")
                 self.tokens[book] = [nltk.pos_tag(nltk.word_tokenize(self.books[book][b])) for b in range(len(self.books[book]))]
 
-    def generate_word_map(self):
+    def generate_word_map(self, books=True):
         big_map = dict()
         for book, l in self.tokens.items():
-            big_map[book] = dict()
+            if books:
+                big_map[book] = dict()
             for i in range(len(l)):
                 for k, d in l[i]:
-                    if d not in big_map[book]:
-                        big_map[book][d] = list()
-                    if k not in big_map[book][d]:
-                        big_map[book][d].append(k)
+                    if books:
+                        if d not in big_map[book]:
+                            big_map[book][d] = list()
+                        if k not in big_map[book][d]:
+                            big_map[book][d].append(k)
+                    else:
+                        if d not in big_map:
+                            big_map[d] = list()
+                        if k not in big_map[d]:
+                            big_map[d].append(k)
         return big_map
 
     def rand_chunk(self, book):
@@ -38,12 +45,16 @@ class Lovecraft:
 
     def shuffle_chunk(self, m, chunk):
         new = ""
-        ignore = ["NNP", ",", ".", "IN", "PRP$", "WP"]
-        punc = [".", ",", "'", ":"]
+        ignore = ["NNP", ",", ".", "IN", "PRP$", "WP", "‘‘", "PRP"]
+        punc = [".", ",", "'", ":", "‘‘", "POS", "''"]
         for i in range(len(chunk)):
-            punc_if = (" ", "")[chunk[i][1] in punc or i == 0]
-            if chunk[i][1] not in ignore:
-                new += punc_if + random.choice(m[chunk[i][1]])
-            else:
+            try:
+                punc_if = (" ", "")[chunk[i][1] in punc or i == 0]
+                if chunk[i][1] not in ignore:
+                    new += punc_if + random.choice(m[chunk[i][1]])
+                else:
+                    new += punc_if + chunk[i][0]
+            except KeyError:
                 new += punc_if + chunk[i][0]
+                continue
         return new
