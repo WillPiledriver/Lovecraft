@@ -2,13 +2,51 @@ import nltk
 import os
 import random
 
+from gutenberg._domain_model.exceptions import UnknownDownloadUriException
+from gutenberg.acquire import load_etext
+from gutenberg.cleanup import strip_headers
+from gutenberg.query import get_etexts
+from gutenberg.query import get_metadata
+
 
 class Lovecraft:
-    def __init__(self, directory):
+    def __init__(self, directory=None, author=None):
         self.books = dict()
         self.directory = directory
         self.tokens = dict()
-        self.load_books()
+        self.author = author
+
+        if directory is not None:
+            self.load_books()
+
+        if author is not None:
+            self.load_gutenberg()
+
+    def load_gutenberg(self, language='en'):
+        texts = get_etexts('author', self.author)
+        texts = {t: list(get_metadata("title", t))[0] for t in texts if list(get_metadata("language", t))[0] == language}
+
+        new_texts = dict()
+        dupes = list()
+        for k, d in texts.items():
+            d = d.replace("\r\n", " ")
+            if d not in dupes:
+                dupes.append(d)
+                new_texts[k] = d
+                try:
+                    self.books[d] = strip_headers(load_etext(k)).strip().split("\r\n\r\n")
+                except UnknownDownloadUriException:
+                    print(f'Book "{d}" does not have a text format and was not loaded.')
+                    del new_texts[k]
+                    dupes.remove(d)
+                    continue
+                self.tokens[d] = [nltk.pos_tag(nltk.word_tokenize(self.books[d][b])) for b in range(len(self.books[d]))]
+            else:
+                pass
+
+        texts = new_texts
+
+        print(texts)
 
     def load_books(self):
         f = []
