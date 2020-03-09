@@ -5,7 +5,7 @@ Experimental natural language program that takes an author's work and breaks it 
 main.py has unnecessary code that integrates with Facebook as an example of how this software can be used by publishing results to an arbitrary Facebook page.
 
 ## How to use
-Using the package is quite simple. You must first have NLTK and gutenberg which can both be installed using pip. For 2.7+ you must install bsddb3 for gutenberg as it has been deprecated. You can find the .whl for your version of python from [this unofficial windows binary page](https://www.lfd.uci.edu/~gohlke/pythonlibs/#bsddb3).
+Using the package is quite simple. You must first have NLTK and gutenberg which can both be installed using pip. For versions above 2.7 you must install bsddb3 for gutenberg as it has been deprecated. You can find the .whl for your version of python from [this unofficial windows binary page](https://www.lfd.uci.edu/~gohlke/pythonlibs/#bsddb3).
 
 ### Using your own library
 You must first create a directory containing your books in this format:
